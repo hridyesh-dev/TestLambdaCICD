@@ -9,19 +9,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Install zip tool 
-        uses: Create Zip file for Lambda Function
-        run: zip -r code.zip 
-      - name: AWS CLI v2 
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install zip and create package
+        run: |
+          sudo apt-get update && sudo apt-get install -y zip
+          zip -r code.zip .
+
+      - name: Update Lambda function
         uses: imhedi/actions-awscli-v2@latest
         with:
-          args: "lambda update-function-code \
-            --function-name arn:aws:lambda:ap-south-1:253862057321:function:TestFunction\
-            --zip-file fileb:// code.zip"
-          
-          # STORING AS A REPO SECRET
-          env:
-            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-            AWS_DEFAULT_REGION: "ap-south-1"
+          args: >
+            lambda update-function-code
+            --function-name TestFunction
+            --zip-file fileb://code.zip
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
